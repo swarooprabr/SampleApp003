@@ -32,7 +32,7 @@ spec:
             host: ar-nextjs-staging.staging.svc.cluster.local
             port:
               number: 3000
-      secretName: veiovia-secret-staging  # Referencing the TLS secret
+      secretname: veiovia-secret-staging  # Referencing the TLS secret
   http:
     - match:
         - uri:
