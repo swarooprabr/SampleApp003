@@ -13,32 +13,60 @@
 # limitations under the License.
 
 apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: frontend-gateway
-spec:
-  selector:
-    istio: ingressgateway # use Istio default gateway implementation
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "*"
----
-apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: frontend-ingress
+  name: ar-nextjs-staging
+  namespace: main
 spec:
   hosts:
-  - "*"
+    - "stage-ar.veiovia.com"
   gateways:
-  - frontend-gateway
+    - mesh
   http:
-  - route:
-    - destination:
-        host: frontend
-        port:
-          number: 80
+    - match:
+        - uri:
+            exact: /
+      rewrite:
+        uri: /$1  
+      route:
+        - destination:
+            host: ar-nextjs-staging.staging.svc.cluster.local
+            port:
+              number: 3000
+  tls:
+    - match:
+        - port: 443
+          sniHosts:
+            - "stage-ar.veiovia.com"
+      route:
+        - destination:
+            host: ar-nextjs-staging.staging.svc.cluster.local
+            port:
+              number: 3000
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: ar-nextjs-staging
+  namespace: main
+spec:
+  host: ar-nextjs-staging.staging.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: SIMPLE  
+      credentialName: veiovia-secret-staging  
+      sni: stage-ar.veiovia.com
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: ar-nextjs-staging-whitelist
+  namespace: main
+spec:
+  selector:
+    matchLabels:
+      app: ar-nextjs-staging
+  rules:
+    - from:
+        - source:
+            ipBlocks: ["18.171.221.131/32"]
