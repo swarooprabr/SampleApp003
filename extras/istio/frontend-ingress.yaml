@@ -19,55 +19,28 @@ metadata:
   namespace: staging
 spec:
   hosts:
-    - "stage-ar.veiovia.com"
+    - stage-ar.veiovia.com
   gateways:
-    - mesh
-  http:
-    - match:
-        - uri:
-            exact: /
-      rewrite:
-        uri: /$1  
-      route:
-        - destination:
-            host: ar-nextjs-staging.staging.svc.cluster.local
-            port:
-              number: 3000
+    - istio-system/ingressgateway  # Assuming you're using the Istio ingress gateway
   tls:
     - match:
         - port: 443
           sniHosts:
-            - "stage-ar.veiovia.com"
+            - stage-ar.veiovia.com
       route:
         - destination:
             host: ar-nextjs-staging.staging.svc.cluster.local
             port:
               number: 3000
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: ar-nextjs-staging
-  namespace: staging
-spec:
-  host: ar-nextjs-staging.staging.svc.cluster.local
-  trafficPolicy:
-    tls:
-      mode: SIMPLE  
-      credentialName: veiovia-secret-staging  
-      sni: stage-ar.veiovia.com
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: ar-nextjs-staging-whitelist
-  namespace: staging
-spec:
-  selector:
-    matchLabels:
-      app: ar-nextjs-staging
-  rules:
-    - from:
-        - source:
-            ipBlocks: ["18.171.221.131/32"]
+      secretName: veiovia-secret-staging  # Referencing the TLS secret
+  http:
+    - match:
+        - uri:
+            prefix: "/"  # This is equivalent to pathType: ImplementationSpecific
+      route:
+        - destination:
+            host: ar-nextjs-staging.staging.svc.cluster.local
+            port:
+              number: 3000
+
 
