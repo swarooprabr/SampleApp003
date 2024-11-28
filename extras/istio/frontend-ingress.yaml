@@ -29,10 +29,10 @@ spec:
             - stage-ar.veiovia.com
       route:
         - destination:
-            hosts: ar-nextjs-staging.staging.svc.cluster.local
+            host: ar-nextjs-staging.staging.svc.cluster.local
             port:
               number: 3000
-      secretName: veiovia-secret-staging  # Referencing the TLS secret
+      credentialName: veiovia-secret-staging  # Referencing the TLS secret
   http:
     - match:
         - uri:
