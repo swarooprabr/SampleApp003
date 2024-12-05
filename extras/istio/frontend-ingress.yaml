@@ -16,7 +16,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: ar-nextjs-staging
-  namespace: staging
+  namespace: default
 spec:
   hosts:
     - "stage-ar.veiovia.com"
@@ -48,7 +48,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: ar-nextjs-staging
-  namespace: staging
+  namespace: default
 spec:
   host: ar-nextjs-staging.staging.svc.cluster.local
   trafficPolicy:
@@ -61,7 +61,7 @@ apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
   name: ar-nextjs-staging-whitelist
-  namespace: staging
+  namespace: default
 spec:
   selector:
     matchLabels:
